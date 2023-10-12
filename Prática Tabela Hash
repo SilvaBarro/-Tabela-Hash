@@ -1,0 +1,86 @@
+# Prática Tabela Hash
+
+# 1. Implementar uma estrutura de tabela hash para armazenar n objetos
+# com encadeamento separado duplo. No encadeamento duplo existem
+# dois níveis de endereçamento, nos dois o mapeamento da chave ao
+# endereço se dá por uma função hash. A figura abaixo ilustra o
+# esquema de encadeamento separado duplo.
+
+# a. No primeiro nível crie um vetor com 10 ponteiros para vetores.
+# Aplique a função hash para direcionar o elemento da chave c
+# em uma das outras tabelas do segundo nível; 
+
+# b. No segundo nível cada tabela é composta por um vetor de n/10
+# listas de objetos a serem armazenados. Uma segunda função
+# hash diferente da primeira deve ser definida para direcionar a
+# chave c em uma das listas específicas 
+
+# 2. Implemente as funções hash específica de cada nível de
+# endereçamento, além dos métodos de inserção de novos objetos a
+# partir de suas chaves únicas e recuperação de objetos já cadastrados a
+# partir da chave única.
+
+
+class TabelaHashDupla:
+    def __init__(self):
+        # Primeiro nível da tabela: vetor com 10 ponteiros para vetores do segundo nível
+        self.primeiro_nivel = [None] * 10
+
+    def hash_primeiro_nivel(self, chave):
+        # Função de hash para direcionar a chave ao primeiro nível
+        return chave % 10
+
+    def hash_segundo_nivel(self, chave):
+        # Função de hash para direcionar a chave ao segundo nível
+        return (chave // 10) % (len(self.primeiro_nivel[0]) if self.primeiro_nivel[0] else 1)
+
+    def inserir(self, chave, objeto):
+        # Calcula os índices do primeiro e segundo níveis
+        indice_primeiro_nivel = self.hash_primeiro_nivel(chave)
+        indice_segundo_nivel = self.hash_segundo_nivel(chave)
+
+        # Se o segundo nível não existir, crie-o
+        if self.primeiro_nivel[indice_primeiro_nivel] is None:
+            self.primeiro_nivel[indice_primeiro_nivel] = [None] * (len(self.primeiro_nivel) // 10)
+
+        # Insere o objeto na lista apropriada no segundo nível
+        if self.primeiro_nivel[indice_primeiro_nivel][indice_segundo_nivel] is None:
+            self.primeiro_nivel[indice_primeiro_nivel][indice_segundo_nivel] = []
+
+        self.primeiro_nivel[indice_primeiro_nivel][indice_segundo_nivel].append((chave, objeto))
+
+    def buscar(self, chave):
+        # Calcula os índices do primeiro e segundo níveis
+        indice_primeiro_nivel = self.hash_primeiro_nivel(chave)
+        indice_segundo_nivel = self.hash_segundo_nivel(chave)
+
+        # Busca o objeto na lista apropriada no segundo nível
+        if (
+            self.primeiro_nivel[indice_primeiro_nivel]
+            and self.primeiro_nivel[indice_primeiro_nivel][indice_segundo_nivel]
+        ):
+            for par_chave_objeto in self.primeiro_nivel[indice_primeiro_nivel][indice_segundo_nivel]:
+                if par_chave_objeto[0] == chave:
+                    return par_chave_objeto[1]
+
+        return None
+
+# Exemplo de uso
+if __name__ == "__main__":
+    tabela = TabelaHashDupla()
+
+    # Inserir valores
+    tabela.inserir(5, "A")
+    tabela.inserir(15, "B")
+    tabela.inserir(25, "C")
+
+    # Buscar valores
+    print(tabela.buscar(5))  # Deve imprimir "A"
+    print(tabela.buscar(15))  # Deve imprimir "B"
+    print(tabela.buscar(25))  # Deve imprimir "C"
+
+
+
+
+
+
